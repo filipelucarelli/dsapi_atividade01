@@ -254,6 +254,19 @@ api.get( '/city' , (req, res, next)=>{
         .catch( next )
 } )
 
+api.post( '/city' , (req, res, next)=>{
+    conn("cidades")
+        .insert( req.body )
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 400 , "Erro ao cadastrar cidade" ) )
+            }
+            res.status( 201 )
+            res.json( { resposta : "Cidade cadastrada com sucesso!" , id : dados[0] } )
+        } )
+        .catch( next )
+} )
+
 //Pedidos
 
 //Pergunta se eu quiser fazer uma busca de todos os pedidos de um cliente, como ficaria o endpoint?
