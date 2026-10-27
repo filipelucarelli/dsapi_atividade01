@@ -101,7 +101,7 @@ api.delete( '/product/:idProd' , (req, res, next)=>{
 
 /* category */
 
-.get( '/category' , (req, res, next)=>{
+api.get( '/category' , (req, res, next)=>{
     conn("categorias")
         .select( "*" )
         .orderBy( "nome" )
@@ -182,6 +182,22 @@ api.get( '/client' , (req, res, next)=>{
         .catch( next )
 } )
 
+api.get( '/client/:idClient' , (req, res, next)=>{
+    const idClient = req.params.idClient
+    conn("clientes")
+        .select( "*" )
+        .where( "id" , idClient )
+        .first()
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 404 , "Cliente não existe" ) )
+            }
+            res.status( 200 )
+            res.json( dados )
+        } )
+        .catch( next )
+} )
+
 api.post( '/client' , (req, res, next)=>{
     conn("clientes")
         .insert( req.body )
@@ -191,6 +207,98 @@ api.post( '/client' , (req, res, next)=>{
             }
             res.status( 201 )
             res.json( { resposta : "Cliente cadastrado com sucesso!" , id : dados[0] } )
+        } )
+        .catch( next )
+} )
+
+api.put( '/client/:idClient' , (req, res, next)=>{
+    const idClient = req.params.idClient
+    conn("clientes")
+        .where( "id", idClient )
+        .update( req.body )
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 404 , "Erro ao editar cliente" ) )
+            }
+            res.status( 200 )
+            res.json( { resposta : "Cliente editado!" } )
+        } )
+        .catch( next )
+} )
+
+api.delete( '/client/:idClient' , (req, res, next)=>{
+    const idClient = req.params.idClient
+    conn("clientes")
+        .where( "id", idClient )
+        .delete()
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 404 , "Erro ao excluir cliente" ) )
+            }
+            res.status( 200 )
+            res.json( { resposta : "Cliente excluído!" } )
+        } )
+        .catch( next )
+} )
+
+//Cidades (Chave estrangeira)
+
+api.get( '/city' , (req, res, next)=>{
+    conn("cidades")
+        .select( "*" )
+        .orderBy( "nome" )
+        .then( (dados) => {
+            res.status( 200 )
+            res.json( dados )
+        } )
+        .catch( next )
+} )
+
+//Pedidos
+
+//Pergunta se eu quiser fazer uma busca de todos os pedidos de um cliente, como ficaria o endpoint?
+
+api.get( '/order/:idOrder' , (req, res, next)=>{
+    const idPedido = req.params.idOrder
+    conn("pedidos")
+        .join( "clientes" , "pedidos.cliente_id" , "=" , "clientes.id")
+        .select( "pedidos.*" , "clientes.nome AS cliente_nome" )
+        .where( "pedidos.id" , idPedido )
+        .first()
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 404 , "Pedido não encontrado" ) )
+            }
+            res.status( 200 )
+            res.json( dados )
+        } )
+        .catch( next )
+} )
+
+api.post( '/order' , (req, res, next)=>{
+    conn("pedidos")
+        .insert( req.body )
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 404 , "Erro ao realizar pedido" ) )
+            }
+            res.status( 201 )
+            res.json( { resposta : "Pedido realizado com sucesso!" , id : dados[0] } )
+        } )
+        .catch( next )
+} )
+
+api.delete( '/order/:idOrder' , (req, res, next)=>{
+    const idPedido = req.params.idOrder
+    conn("pedidos")
+        .where( "id", idPedido )
+        .delete()
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 404 , "Erro ao excluir pedido" ) )
+            }
+            res.status( 200 )
+            res.json( { resposta : "Pedido excluído com sucesso!" } )
         } )
         .catch( next )
 } )
