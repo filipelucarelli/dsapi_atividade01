@@ -316,6 +316,30 @@ api.delete( '/order/:idOrder' , (req, res, next)=>{
         .catch( next )
 } )
 
+//Último endpoint (N para N) para produtos, fiz separado do order
+
+api.post( '/order/:idOrder/product' , (req, res, next)=>{
+    const idPedido = req.params.idOrder
+    const { produto_id, preco, quantidade } = req.body
+
+    conn("pedidos_produtos")
+        .insert({
+            pedido_id: idPedido,
+            produto_id,
+            preco,
+            quantidade
+        })
+        .then( (dados) => {
+            if( !dados ){
+                return next( http_errors( 400 , "Erro ao adicionar produto ao pedido" ) )
+            }
+            res.status( 201 )
+            res.json( { resposta : "Produto adicionado ao pedido com sucesso!" } )
+        } )
+        .catch( next )
+} )
+
+
 
 // Colocando o servidor no ar
 api.listen( PORT , ()=>{
